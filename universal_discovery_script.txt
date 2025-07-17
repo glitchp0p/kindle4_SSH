@@ -1,0 +1,19 @@
+cat > find-kindle-ip.sh << 'EOF'
+#!/bin/bash
+echo "Looking for Kindle SSH..."
+
+# Common Kindle IPs to try:
+IPS=("192.168.15.244" "192.168.2.2" "192.168.191.1" "10.0.0.2")
+
+for ip in "${IPS[@]}"; do
+    echo "Trying $ip..."
+    if timeout 3 ssh -o ConnectTimeout=2 -o BatchMode=yes root@$ip exit 2>/dev/null; then
+        echo "✅ Found Kindle at: $ip"
+        exit 0
+    fi
+done
+
+echo "❌ No Kindle found on common IPs. Check USBNetwork config."
+EOF
+
+chmod +x find-kindle-ip.sh
