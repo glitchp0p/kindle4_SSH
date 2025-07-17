@@ -1,0 +1,2 @@
+# One-liner version:
+KINDLE_IFACE=$(ip link show | grep -B1 "ee:49:00:00:00:00" | head -1 | cut -d: -f2 | tr -d ' ') && [ -n "$KINDLE_IFACE" ] && sudo nmcli device set $KINDLE_IFACE managed no 2>/dev/null && sudo ip addr flush dev $KINDLE_IFACE && sudo ip addr add 192.168.15.201/24 dev $KINDLE_IFACE && sudo ip link set $KINDLE_IFACE up && echo "Kindle ready: ssh root@192.168.15.244"
