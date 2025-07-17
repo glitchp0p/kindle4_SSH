@@ -1,0 +1,41 @@
+# Create this script on any machine:
+cat > kindle4-setup.sh << 'EOF'
+#!/bin/bash
+
+# Kindle 4 SSH Setup Script
+# MAC Address: ee:49:00:00:00:00
+# Target IPs: Kindle=192.168.15.244, Host=192.168.15.201
+
+echo "Looking for Kindle 4 (MAC: ee:49:00:00:00:00)..."
+
+# Find interface with this specific Kindle's MAC
+KINDLE_IFACE=$(ip link show | grep -B1 "ee:49:00:00:00:00" | head -1 | cut -d: -f2 | tr -d ' ')
+
+if [ -z "$KINDLE_IFACE" ]; then
+    echo "❌ Kindle 4 not found. Make sure it's plugged in and USBNetwork is enabled."
+    exit 1
+fi
+
+echo "✅ Found Kindle on interface: $KINDLE_IFACE"
+
+# Configure network
+echo "🔧 Configuring network..."
+sudo nmcli device set $KINDLE_IFACE managed no 2>/dev/null || true
+sudo ip addr flush dev $KINDLE_IFACE
+sudo ip addr add 192.168.15.201/24 dev $KINDLE_IFACE
+sudo ip link set $KINDLE_IFACE up
+
+# Test connection
+echo "🏓 Testing connection..."
+if ping -c 3 -W 2 192.168.15.244 >/dev/null 2>&1; then
+    echo "✅ Kindle 4 ready!"
+    echo "🚀 SSH command: ssh root@192.168.15.244"
+    echo "📁 Working directory: cd /mnt/us/"
+    echo "✏️  Make writable: mntroot rw"
+else
+    echo "❌ Connection failed. Check Kindle USBNetwork status."
+    exit 1
+fi
+EOF
+
+chmod +x kindle4-setup.sh
